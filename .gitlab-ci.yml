@@ -1,0 +1,18 @@
+# Checks every proof in the repo on each push.
+# Uses the official Lean image so elan and a compiler are already present;
+# `lake exe cache get` then pulls Mathlib's prebuilt oleans instead of
+# rebuilding Mathlib from source.
+stages: [build]
+
+lean:
+  stage: build
+  image: leanprovercommunity/mathlib:latest
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .lake/
+  script:
+    - elan toolchain install "$(cat lean-toolchain)"
+    - elan override set "$(cat lean-toolchain)"
+    - lake exe cache get
+    - lake build
