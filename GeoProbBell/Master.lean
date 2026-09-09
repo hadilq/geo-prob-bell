@@ -49,14 +49,15 @@ verdict. -/
 theorem adj_le (u : ι → ℝ) (μ : ℝ) (w : ι → ℝ) (c : ℝ)
     (h0 : 0 ≤ μ) (h1 : μ ≤ 1) (hw : ∀ i, |w i| ≤ c) (hu : |pair u w| ≤ c) (i : ι) :
     |adj u μ w i| ≤ c := by
-  have hA : |μ * w i| ≤ μ * c := by
-    rw [abs_mul, abs_of_nonneg h0]; exact mul_le_mul_of_nonneg_left (hw i) h0
-  have hB : |(1 - μ) * pair u w| ≤ (1 - μ) * c := by
-    rw [abs_mul, abs_of_nonneg (by linarith : (0:ℝ) ≤ 1 - μ)]
-    exact mul_le_mul_of_nonneg_left hu (by linarith)
-  calc |adj u μ w i| = |μ * w i + (1 - μ) * pair u w| := rfl
-    _ ≤ |μ * w i| + |(1 - μ) * pair u w| := abs_add _ _
-    _ ≤ μ * c + (1 - μ) * c := add_le_add hA hB
-    _ = c := by ring
+  have hw' := abs_le.mp (hw i)
+  have hu' := abs_le.mp hu
+  have hμ : (0:ℝ) ≤ 1 - μ := by linarith
+  have p1 : 0 ≤ μ * (w i + c) := mul_nonneg h0 (by linarith [hw'.1])
+  have p2 : 0 ≤ μ * (c - w i) := mul_nonneg h0 (by linarith [hw'.2])
+  have p3 : 0 ≤ (1 - μ) * (pair u w + c) := mul_nonneg hμ (by linarith [hu'.1])
+  have p4 : 0 ≤ (1 - μ) * (c - pair u w) := mul_nonneg hμ (by linarith [hu'.2])
+  show |μ * w i + (1 - μ) * pair u w| ≤ c
+  rw [abs_le]
+  constructor <;> nlinarith [p1, p2, p3, p4]
 
 end GeoProbBell

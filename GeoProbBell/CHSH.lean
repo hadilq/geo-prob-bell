@@ -30,15 +30,15 @@ against on the new chart. -/
 theorem chsh_local_preserved (μ b : ℝ) (E : Fin 2 → Fin 2 → ℝ)
     (h0 : 0 ≤ μ) (h1 : μ ≤ 1) (hb : |b| ≤ 1) (hE : |chsh E| ≤ 2) :
     |chsh (fun x y => μ * E x y + (1 - μ) * b)| ≤ 2 := by
-  rw [chsh_affine]
-  have hA : |μ * chsh E| ≤ μ * 2 := by
-    rw [abs_mul, abs_of_nonneg h0]; exact mul_le_mul_of_nonneg_left hE h0
-  have hB : |2 * (1 - μ) * b| ≤ 2 * (1 - μ) := by
-    rw [abs_mul, abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * (1 - μ))]
-    exact mul_le_of_le_one_right (by linarith) hb
-  calc |μ * chsh E + 2 * (1 - μ) * b| ≤ |μ * chsh E| + |2 * (1 - μ) * b| := abs_add _ _
-    _ ≤ μ * 2 + 2 * (1 - μ) := add_le_add hA hB
-    _ = 2 := by ring
+  rw [chsh_affine, abs_le]
+  have hb' := abs_le.mp hb
+  have hE' := abs_le.mp hE
+  have hμ : (0:ℝ) ≤ 1 - μ := by linarith
+  have p1 : 0 ≤ μ * (2 - chsh E) := mul_nonneg h0 (by linarith [hE'.2])
+  have p2 : 0 ≤ μ * (chsh E + 2) := mul_nonneg h0 (by linarith [hE'.1])
+  have p3 : 0 ≤ (1 - μ) * (1 - b) := mul_nonneg hμ (by linarith [hb'.2])
+  have p4 : 0 ≤ (1 - μ) * (b + 1) := mul_nonneg hμ (by linarith [hb'.1])
+  constructor <;> nlinarith [p1, p2, p3, p4]
 
 /-- The re-charted CHSH value, bounded using Tsirelson's number as an input.
 This is the boxed inequality of §8. -/
@@ -46,14 +46,14 @@ theorem chsh_bound (μ b : ℝ) (E : Fin 2 → Fin 2 → ℝ) (h0 : 0 ≤ μ) (h
     (hT : |chsh E| ≤ 2 * Real.sqrt 2) :
     |chsh (fun x y => μ * E x y + (1 - μ) * b)|
       ≤ 2 * Real.sqrt 2 * μ + 2 * (1 - μ) * |b| := by
-  rw [chsh_affine]
-  have hA : |μ * chsh E| ≤ μ * (2 * Real.sqrt 2) := by
-    rw [abs_mul, abs_of_nonneg h0]; exact mul_le_mul_of_nonneg_left hT h0
-  have hB : |2 * (1 - μ) * b| = 2 * (1 - μ) * |b| := by
-    rw [abs_mul, abs_of_nonneg (by linarith : (0:ℝ) ≤ 2 * (1 - μ))]
-  calc |μ * chsh E + 2 * (1 - μ) * b| ≤ |μ * chsh E| + |2 * (1 - μ) * b| := abs_add _ _
-    _ = |μ * chsh E| + 2 * (1 - μ) * |b| := by rw [hB]
-    _ ≤ μ * (2 * Real.sqrt 2) + 2 * (1 - μ) * |b| := by linarith
-    _ = 2 * Real.sqrt 2 * μ + 2 * (1 - μ) * |b| := by ring
+  rw [chsh_affine, abs_le]
+  have hT' := abs_le.mp hT
+  have hb' := abs_le.mp (le_refl |b|)
+  have hμ : (0:ℝ) ≤ 1 - μ := by linarith
+  have p1 : 0 ≤ μ * (2 * Real.sqrt 2 - chsh E) := mul_nonneg h0 (by linarith [hT'.2])
+  have p2 : 0 ≤ μ * (chsh E + 2 * Real.sqrt 2) := mul_nonneg h0 (by linarith [hT'.1])
+  have p3 : 0 ≤ (1 - μ) * (|b| - b) := mul_nonneg hμ (by linarith [hb'.2])
+  have p4 : 0 ≤ (1 - μ) * (b + |b|) := mul_nonneg hμ (by linarith [hb'.1])
+  constructor <;> nlinarith [p1, p2, p3, p4]
 
 end GeoProbBell
